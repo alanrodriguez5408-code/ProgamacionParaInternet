@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adivina el Número</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f0f2f5;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .game-card {
+            max-width: 450px;
+            width: 100%;
+            border: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-radius: 15px;
+        }
+
+        .guess-input {
+            font-size: 1.5rem;
+            text-align: center;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        /* Animación suave para los mensajes */
+        .fade-in {
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card game-card p-4">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-primary">❓ Adivina el Número</h2>
+            <p class="text-muted">He pensado un número del 1 al 100.<br>¿Puedes adivinar cuál es?</p>
+        </div>
+
+        <div id="gameArea">
+            <div class="mb-3">
+                <label for="userGuess" class="form-label fw-bold">Ingresa tu intento:</label>
+                <div class="input-group">
+                    <input type="number" id="userGuess" class="form-control guess-input" placeholder="0" min="1" max="100">
+                    <button class="btn btn-primary px-4 fw-bold" onclick="checkGuess()">Probar</button>
+                </div>
+            </div>
+
+            <div id="feedback" class="alert d-none text-center fw-bold" role="alert"></div>
+
+            <div class="row mt-4 text-center">
+                <div class="col-6 border-end">
+                    <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Intentos Restantes</small>
+                    <h3 id="attemptsDisplay" class="text-danger mb-0">10</h3>
+                </div>
+                <div class="col-6">
+                    <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Números Probados</small>
+                    <div id="historyDisplay" class="mt-1">
+                        <span class="text-muted fst-italic">Ninguno aún</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="restartArea" class="text-center d-none mt-4">
+            <h3 id="resultMessage" class="mb-3 fw-bold"></h3>
+            <button class="btn btn-success btn-lg w-100 shadow" onclick="initGame()">
+                🔄 Jugar Otra Vez
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let randomNumber;
+        let attempts;
+        let guesses = [];
+        const maxAttempts = 10;
+
+        // Elementos del DOM
+        const guessInput = document.getElementById('userGuess');
+        const feedbackEl = document.getElementById('feedback');
+        const attemptsEl = document.getElementById('attemptsDisplay');
+        const historyEl = document.getElementById('historyDisplay');
+        const gameArea = document.getElementById('gameArea');
+        const restartArea = document.getElementById('restartArea');
+        const resultMessage = document.getElementById('resultMessage');
+
+        // Inicializar el juego al cargar
+        window.onload = initGame;
+
+        // Permitir jugar con la tecla ENTER
+        guessInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                checkGuess();
+            }
+        });
+
+        function initGame() {
+            // 1. Generar número aleatorio (1-100)
+            randomNumber = Math.floor(Math.random() * 100) + 1;
+            
+            // 2. Resetear variables
+            attempts = maxAttempts;
+            guesses = [];
+
+            // 3. Resetear Interfaz
+            attemptsEl.innerText = attempts;
+            historyEl.innerHTML = '<span class="text-muted fst-italic">Ninguno aún</span>';
+            feedbackEl.className = 'alert d-none'; // Ocultar alerta
+            guessInput.value = '';
+            guessInput.disabled = false;
+            guessInput.focus();
+
+            // 4. Mostrar área de juego, ocultar reinicio
+            gameArea.classList.remove('d-none');
+            restartArea.classList.add('d-none');
+            
+            console.log("Número secreto (para pruebas): " + randomNumber);
+        }
+
+        function checkGuess() {
+            const userValue = Number(guessInput.value);
+
+            // Validaciones básicas
+            if (guessInput.value === '' || userValue < 1 || userValue > 100) {
+                showMessage('Por favor, ingresa un número válido entre 1 y 100.', 'warning');
+                return;
+            }
+
+            if (guesses.includes(userValue)) {
+                showMessage('¡Ya intentaste ese número! Prueba otro.', 'warning');
+                return;
+            }
+
+            // Registrar intento
+            guesses.push(userValue);
+            attempts--;
+            updateStats();
+
+            // Lógica principal
+            if (userValue === randomNumber) {
+                endGame(true);
+            } else if (attempts === 0) {
+                endGame(false);
+            } else {
+                // Dar pista
+                if (userValue < randomNumber) {
+                    showMessage(`¡Demasiado BAJO! El número es mayor que ${userValue}. 🔼`, 'info');
+                } else {
+                    showMessage(`¡Demasiado ALTO! El número es menor que ${userValue}. 🔽`, 'info');
+                }
+                // Limpiar input y enfocar
+                guessInput.value = '';
+                guessInput.focus();
+            }
+        }
+
+        function showMessage(msg, type) {
+            feedbackEl.textContent = msg;
+            // Tipos de alerta Bootstrap: success (verde), danger (rojo), warning (amarillo), info (azul)
+            feedbackEl.className = `alert alert-${type} fade-in mb-3`; 
+        }
+
+        function updateStats() {
+            attemptsEl.innerText = attempts;
+            // Mostrar historial como etiquetas (badges)
+            historyEl.innerHTML = guesses.map(num => 
+                `<span class="badge bg-secondary me-1">${num}</span>`
+            ).join('');
+        }
+
+        function endGame(won) {
+            gameArea.classList.add('d-none');
+            restartArea.classList.remove('d-none');
+
+            if (won) {
+                resultMessage.innerHTML = `🎉 ¡Felicidades!<br>Adivinaste el número <span class="text-primary">${randomNumber}</span>`;
+                resultMessage.className = "mb-3 fw-bold text-success";
+            } else {
+                resultMessage.innerHTML = `💀 Game Over<br>El número era <span class="text-primary">${randomNumber}</span>`;
+                resultMessage.className = "mb-3 fw-bold text-danger";
+            }
+        }
+    </script>
+</body>
+</html>
