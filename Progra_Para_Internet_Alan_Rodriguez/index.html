@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HyperGarage | Colección Local</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        
+        :root {
+            --gold: #d4af37;
+            --dark-bg: #0f0f0f;
+            --card-bg: #1a1a1a;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        
+        .hero {
+            height: 60vh;
+            
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-weight: 800;
+            font-size: 4rem;
+            text-transform: uppercase;
+            background: linear-gradient(to right, #fff, var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        
+        .filter-btn {
+            background: transparent;
+            color: #aaa;
+            border: 1px solid #333;
+            padding: 10px 25px;
+            margin: 0 5px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--gold);
+            color: #000;
+            border-color: var(--gold);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        }
+
+        
+        .car-card {
+            background: var(--card-bg);
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            cursor: pointer;
+        }
+
+        .car-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        }
+
+        .car-img-container {
+            height: 250px;
+            overflow: hidden;
+            background-color: #000; 
+        }
+
+        .car-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .car-card:hover .car-img {
+            transform: scale(1.1);
+        }
+
+        .card-body { padding: 1.5rem; }
+
+        .price-tag {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--gold);
+            color: #000;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 2;
+        }
+
+        
+        .modal-content {
+            background-color: #111;
+            border: 1px solid #333;
+            color: #fff;
+        }
+        .modal-header, .modal-footer { border-color: #333; }
+        .btn-close { filter: invert(1); }
+
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-transparent fixed-top pt-3">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">HYPER<span style="color: var(--gold);">GARAGE</span></a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Ingeniería Sin Límites</h1>
+            <p class="lead text-white-50 mt-3">Tus archivos locales, visualizados con estilo.</p>
+            <a href="#catalogo" class="btn btn-outline-light mt-4 rounded-pill px-5">Ver Colección</a>
+        </div>
+    </section>
+
+    <section id="catalogo" class="container py-5">
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h2 class="mb-4 fw-bold">Nuestra Flota</h2>
+                <div class="d-flex justify-content-center flex-wrap gap-2">
+                    <button class="filter-btn active" onclick="filterCars('all')">Todos</button>
+                    <button class="filter-btn" onclick="filterCars('Bugatti')">Bugatti</button>
+                    <button class="filter-btn" onclick="filterCars('Koenigsegg')">Koenigsegg</button>
+                    <button class="filter-btn" onclick="filterCars('Lamborghini')">Lamborghini</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4" id="car-grid"></div>
+    </section>
+
+    <div class="modal fade" id="carModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="modalTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <img src="" id="modalImg" class="img-fluid rounded mb-3" alt="Coche">
+                        </div>
+                        <div class="col-md-6">
+                            <h3 class="text-warning" id="modalPrice"></h3>
+                            <p id="modalDesc" class="text-secondary"></p>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item bg-transparent text-white border-secondary">🏁 0-100: <span id="modalSpeed" class="float-end fw-bold"></span></li>
+                                <li class="list-group-item bg-transparent text-white border-secondary">🚀 Max: <span id="modalMax" class="float-end fw-bold"></span></li>
+                                <li class="list-group-item bg-transparent text-white border-secondary">🐎 Potencia: <span id="modalHp" class="float-end fw-bold"></span></li>
+                            </ul>
+                            <button class="btn btn-warning w-100 mt-4 fw-bold">Comprar Ahora</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        
+        
+        const cars = [
+            {
+                id: 1,
+                brand: "Bugatti",
+                model: "Chiron Super Sport",
+                price: "$3,900,000",
+                img: "Chiron Super Sport.jpg",  
+                hp: "1600 HP",
+                speed: "2.4s",
+                max: "440 km/h",
+                desc: "La bestia negra y naranja. El Chiron Super Sport es la combinación perfecta de aerodinámica y potencia bruta."
+            },
+            {
+                id: 2,
+                brand: "Koenigsegg",
+                model: "Jesko Absolut",
+                price: "$3,000,000",
+                img: "Jesko Absolut.jpg",  
+                hp: "1280 HP",
+                speed: "2.5s",
+                max: "531 km/h",
+                desc: "El rey de la velocidad sueca. Diseñado con un solo propósito: ser el coche de producción más rápido de la historia."
+            },
+            {
+                id: 3,
+                brand: "Lamborghini",
+                model: "Sian FKP 37",
+                price: "$3,600,000",
+                img: "Sian FKP 37.jpg",  
+                hp: "819 HP",
+                speed: "2.8s",
+                max: "350 km/h",
+                desc: "Futurismo puro. El primer híbrido de Lamborghini usa supercondensadores en lugar de baterías tradicionales."
+            },
+            {
+                id: 4,
+                brand: "Bugatti",
+                model: "Divo",
+                price: "$5,800,000",
+                img: "Divo.jpg",  
+                hp: "1500 HP",
+                speed: "2.4s",
+                max: "380 km/h",
+                desc: "Hecho para las curvas. Con un diseño más agresivo que el Chiron, el Divo domina la pista."
+            },
+            {
+                id: 5,
+                brand: "Lamborghini",
+                model: "Revuelto",
+                price: "$600,000",
+                img: "Revuelto.webp",  
+                hp: "1001 HP",
+                speed: "2.5s",
+                max: "350 km/h",
+                desc: "El primer HPEV (High Performance Electrified Vehicle) V12 híbrido enchufable de Lamborghini."
+            },
+            {
+                id: 6,
+                brand: "Koenigsegg",
+                model: "Gemera",
+                price: "$1,700,000",
+                img: "Gemera.webp",  
+                hp: "1700 HP",
+                speed: "1.9s",
+                max: "400 km/h",
+                desc: "El Mega-GT para la familia. Espacio para 4 personas, equipaje y una aceleración que rompe cuellos."
+            }
+        ];
+
+       
+        const carGrid = document.getElementById('car-grid');
+        const modal = new bootstrap.Modal(document.getElementById('carModal'));
+
+        function renderCars(filter = 'all') {
+            carGrid.innerHTML = '';
+            const filtered = filter === 'all' ? cars : cars.filter(c => c.brand === filter);
+
+            filtered.forEach((car, i) => {
+                const col = document.createElement('div');
+                col.className = 'col-md-4 mb-4';
+                col.innerHTML = `
+                    <div class="car-card h-100" onclick="openModal(${car.id})">
+                        <div class="car-img-container">
+                            <img src="${car.img}" class="car-img" alt="${car.model}" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300?text=No+Imagen';">
+                        </div>
+                        <div class="card-body">
+                            <div class="price-tag">${car.price}</div>
+                            <h5 class="car-title text-white">${car.model}</h5>
+                            <p class="text-secondary small">${car.brand}</p>
+                            <div class="d-flex justify-content-between text-muted small border-top pt-3 border-secondary">
+                                <span><i class="fas fa-tachometer-alt text-warning"></i> ${car.speed}</span>
+                                <span><i class="fas fa-horse text-warning"></i> ${car.hp}</span>
+                            </div>
+                        </div>
+                    </div>`;
+                
+                
+                col.style.animation = `fadeIn 0.5s ease forwards ${i * 0.1}s`;
+                col.style.opacity = '0';
+                carGrid.appendChild(col);
+            });
+        }
+
+        
+        function filterCars(brand) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderCars(brand);
+        }
+
+       
+        function openModal(id) {
+            const car = cars.find(c => c.id === id);
+            document.getElementById('modalTitle').innerText = `${car.brand} ${car.model}`;
+            document.getElementById('modalPrice').innerText = car.price;
+            document.getElementById('modalImg').src = car.img;
+            document.getElementById('modalDesc').innerText = car.desc;
+            document.getElementById('modalSpeed').innerText = car.speed;
+            document.getElementById('modalMax').innerText = car.max;
+            document.getElementById('modalHp').innerText = car.hp;
+            modal.show();
+        }
+
+        
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`;
+        document.head.appendChild(styleSheet);
+
+        renderCars();
+    </script>
+</body>
+</html>
