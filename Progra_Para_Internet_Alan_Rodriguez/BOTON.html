@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Lista de Tareas Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header-top">
+            <h1>📝 Mis Tareas</h1>
+            <button id="toggle-tema" class="btn-tema" title="Cambiar Tema">
+                <i class="fas fa-moon"></i>
+            </button>
+        </header>
+
+        <form id="form-tarea">
+            <div class="input-group">
+                <input type="text" id="input-tarea" placeholder="¿Qué necesitas hacer?" required>
+            </div>
+            
+            <div class="opciones-tarea">
+                <select id="input-categoria">
+                    <option value="personal">👤 Personal</option>
+                    <option value="trabajo">💼 Trabajo</option>
+                    <option value="estudio">📚 Estudio</option>
+                    <option value="hogar">🏠 Hogar</option>
+                </select>
+                <input type="date" id="input-fecha" required>
+                <button type="submit" id="btn-agregar">
+                    <i class="fas fa-plus"></i> Agregar
+                </button>
+            </div>
+        </form>
+
+        <div class="filtros">
+            <button class="filtro activo" data-filtro="todas">Todas</button>
+            <button class="filtro" data-filtro="pendientes">Pendientes</button>
+            <button class="filtro" data-filtro="completadas">Completadas</button>
+        </div>
+
+        <ul id="lista-tareas">
+            </ul>
+
+        <p class="contador">
+            <span id="contador-pendientes">0</span> tareas pendientes
+        </p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
