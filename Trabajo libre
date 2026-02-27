@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Tareas Vue</title>
+  <style>
+    /* Estilos básicos para que se vea moderno y limpio */
+    body {
+      background-color: #f0f2f5;
+    }
+    
+    .contenedor {
+      max-width: 500px;
+      margin: 40px auto;
+      font-family: sans-serif;
+      color: #333;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .panel-entrada {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    .btn-agregar {
+      padding: 10px 20px;
+      background-color: #42b883;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .btn-agregar:hover {
+      background-color: #33a06f;
+    }
+
+    .lista-tareas {
+      list-style: none;
+      padding: 0;
+    }
+
+    .lista-tareas li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background: #f9f9f9;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: 1px solid #eee;
+    }
+
+    .tarea-completada label {
+      text-decoration: line-through;
+      color: #888;
+    }
+
+    .btn-eliminar {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    /* --- Animaciones --- */
+    .animacion-lista-enter-active,
+    .animacion-lista-leave-active {
+      transition: all 0.4s ease;
+    }
+    .animacion-lista-enter-from,
+    .animacion-lista-leave-to {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="app">
+    <main class="contenedor">
+      <h1>Mis Tareas ✨</h1>
+      
+      <div class="panel-entrada">
+        <input 
+          type="text"
+          v-model="nuevaTarea" 
+          @keyup.enter="agregarTarea"
+          placeholder="Escribe una tarea y presiona Enter..."
+        >
+        <button class="btn-agregar" @click="agregarTarea">Agregar</button>
+      </div>
+
+      <transition-group name="animacion-lista" tag="ul" class="lista-tareas">
+        <li v-for="tarea in tareas" :key="tarea.id" :class="{ 'tarea-completada': tarea.completada }">
+          <label>
+            <input type="checkbox" v-model="tarea.completada">
+            {{ tarea.texto }}
+          </label>
+          <button class="btn-eliminar" @click="eliminarTarea(tarea.id)">❌</button>
+        </li>
+      </transition-group>
+    </main>
+  </div>
+
+  <script type="module">
+    // Importamos Vue desde internet
+    import { createApp, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+
+    createApp({
+      setup() {
+        // 1. Nuestro estado
+        const nuevaTarea = ref('')
+        const tareas = ref([
+          { id: 1, texto: 'Aprender los básicos de Vue', completada: true },
+          { id: 2, texto: 'Crear mi primera aplicación', completada: false }
+        ])
+
+        // 2. Función para agregar
+        const agregarTarea = () => {
+          if (nuevaTarea.value.trim() === '') return
+          
+          tareas.value.unshift({
+            id: Date.now(),
+            texto: nuevaTarea.value,
+            completada: false
+          })
+          nuevaTarea.value = ''
+        }
+
+        // 3. Función para eliminar
+        const eliminarTarea = (id) => {
+          tareas.value = tareas.value.filter(tarea => tarea.id !== id)
+        }
+
+        // Tenemos que "retornar" las cosas para que el HTML las pueda usar
+        return {
+          nuevaTarea,
+          tareas,
+          agregarTarea,
+          eliminarTarea
+        }
+      }
+    }).mount('#app') // Montamos la app en el div con id="app"
+  </script>
+
+</body>
+</html>
