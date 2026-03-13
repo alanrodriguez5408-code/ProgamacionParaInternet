@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Simulador de Entrevista IA</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',Tahoma,sans-serif;
+}
+
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(135deg,#1f3c88,#4a90e2);
+}
+
+.container{
+background:white;
+width:420px;
+padding:35px;
+border-radius:15px;
+box-shadow:0 15px 40px rgba(0,0,0,0.25);
+animation:fadeIn .6s ease;
+}
+
+h2{
+text-align:center;
+margin-bottom:20px;
+color:#333;
+}
+
+input,textarea{
+width:100%;
+padding:12px;
+margin-top:10px;
+border-radius:8px;
+border:1px solid #ccc;
+font-size:14px;
+transition:0.3s;
+}
+
+input:focus,textarea:focus{
+border-color:#4a90e2;
+outline:none;
+box-shadow:0 0 5px rgba(74,144,226,.4);
+}
+
+textarea{
+resize:none;
+}
+
+button{
+width:100%;
+padding:12px;
+margin-top:15px;
+border:none;
+border-radius:8px;
+background:#4a90e2;
+color:white;
+font-weight:bold;
+font-size:14px;
+cursor:pointer;
+transition:.3s;
+}
+
+button:hover{
+background:#2c6ed5;
+transform:translateY(-1px);
+}
+
+.hidden{
+display:none;
+}
+
+.error{
+color:#e74c3c;
+text-align:center;
+margin-top:10px;
+}
+
+#preguntaTexto{
+margin-top:15px;
+padding:10px;
+background:#f5f7fb;
+border-radius:8px;
+font-weight:bold;
+color:#333;
+}
+
+#feedbackText{
+margin-top:15px;
+padding:12px;
+background:#eef3ff;
+border-left:5px solid #4a90e2;
+border-radius:8px;
+font-size:14px;
+}
+
+@keyframes fadeIn{
+from{
+opacity:0;
+transform:translateY(10px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container" id="loginSection">
+
+<h2>Simulador de Entrevista IA</h2>
+
+<input type="text" id="username" placeholder="Usuario">
+<input type="password" id="password" placeholder="Contraseña">
+
+<button onclick="iniciarSesion()">Ingresar</button>
+
+<p id="errorMsg" class="error hidden">Usuario o contraseña incorrectos</p>
+
+</div>
+
+<div class="container hidden" id="appSection">
+
+<h2>Práctica de Entrevista</h2>
+
+<input type="text" id="puesto" placeholder="Puesto al que aplicas">
+
+<button onclick="generarPregunta()">Generar Pregunta</button>
+
+<h3 id="preguntaTexto"></h3>
+
+<div id="respuestaDiv" class="hidden">
+
+<textarea id="respuestaUsuario" rows="4" placeholder="Escribe tu respuesta"></textarea>
+
+<button onclick="evaluarRespuesta()">Evaluar Respuesta</button>
+
+</div>
+
+<div id="feedbackText" class="hidden"></div>
+
+</div>
+
+<script>
+
+const BACKEND_URL=""
+
+let preguntaActual=""
+
+async function iniciarSesion(){
+
+const user=document.getElementById("username").value
+const pass=document.getElementById("password").value
+
+const res=await fetch(`${BACKEND_URL}/login`,{
+
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({username:user,password:pass})
+
+})
+
+const data=await res.json()
+
+if(data.success){
+
+document.getElementById("loginSection").classList.add("hidden")
+document.getElementById("appSection").classList.remove("hidden")
+
+}else{
+
+document.getElementById("errorMsg").classList.remove("hidden")
+
+}
+
+}
+
+async function generarPregunta(){
+
+const puesto=document.getElementById("puesto").value
+
+if(!puesto) return alert("Escribe un puesto")
+
+document.getElementById("preguntaTexto").innerText="Generando pregunta..."
+
+const res=await fetch(`${BACKEND_URL}/api/entrevista`,{
+
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({fase:1,puesto:puesto})
+
+})
+
+const data=await res.json()
+
+preguntaActual=data.respuestaIA
+
+document.getElementById("preguntaTexto").innerText=preguntaActual
+
+document.getElementById("respuestaDiv").classList.remove("hidden")
+
+}
+
+async function evaluarRespuesta(){
+
+const respuesta=document.getElementById("respuestaUsuario").value
+
+if(!respuesta) return alert("Escribe tu respuesta")
+
+document.getElementById("feedbackText").classList.remove("hidden")
+
+document.getElementById("feedbackText").innerText="Analizando respuesta..."
+
+const res=await fetch(`${BACKEND_URL}/api/entrevista`,{
+
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+fase:2,
+pregunta:preguntaActual,
+respuesta:respuesta
+})
+
+})
+
+const data=await res.json()
+
+document.getElementById("feedbackText").innerText=data.respuestaIA
+
+}
+
+</script>
+
+</body>
+</html>
