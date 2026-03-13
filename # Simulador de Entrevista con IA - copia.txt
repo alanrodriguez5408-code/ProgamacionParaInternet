@@ -1,0 +1,180 @@
+# Simulador de Entrevista con IA
+
+Aplicación web que simula una entrevista de trabajo.
+El sistema genera preguntas para un puesto específico y evalúa las respuestas del usuario.
+
+Este proyecto usa un **frontend en HTML/CSS/JavaScript** y un **backend con Node.js y Express** desplegado en la nube mediante Render.
+
+---
+
+# Características
+
+* Inicio de sesión simple
+* Generación de preguntas de entrevista
+* Evaluación de respuestas del usuario
+* Interfaz moderna y fácil de usar
+* API backend conectada al frontend
+* Despliegue en la nube
+
+---
+
+# Tecnologías utilizadas
+
+Frontend
+
+* HTML
+* CSS
+* JavaScript
+
+Backend
+
+* Node.js
+* Express.js
+* API REST
+
+Herramientas
+
+* GitHub
+* Render
+
+---
+
+# Estructura del proyecto
+
+```
+simulador-entrevista
+│
+├── server.js
+├── package.json
+└── public
+    └── index.html
+```
+
+---
+
+# Instalación
+
+1. Clonar el repositorio
+
+```
+git clone https://github.com/tuusuario/simulador-entrevista.git
+```
+
+2. Entrar a la carpeta del proyecto
+
+```
+cd simulador-entrevista
+```
+
+3. Instalar dependencias
+
+```
+npm install
+```
+
+---
+
+# Ejecutar el proyecto
+
+Para iniciar el servidor local:
+
+```
+npm start
+```
+
+El servidor se ejecutará en:
+
+```
+http://localhost:3000
+```
+
+---
+
+# Uso
+
+1. Abrir la aplicación en el navegador
+2. Iniciar sesión con:
+
+Usuario
+
+```
+alan
+```
+
+Contraseña
+
+```
+1234
+```
+
+3. Escribir el puesto al que se desea aplicar
+4. Generar una pregunta de entrevista
+5. Escribir una respuesta
+6. Recibir retroalimentación del sistema
+
+---
+
+# API Endpoints
+
+Login
+
+```
+POST /login
+```
+
+Generar pregunta o evaluar respuesta
+
+```
+POST /api/entrevista
+```
+
+Ejemplo de petición:
+
+```
+{
+  "fase": 1,
+  "puesto": "Desarrollador Web"
+}
+```
+
+---
+
+# Despliegue
+
+El proyecto se puede desplegar fácilmente usando Render.
+
+Pasos:
+
+1. Subir el proyecto a GitHub
+2. Crear un **Web Service** en Render
+3. Configurar:
+
+Build Command
+
+```
+npm install
+```
+
+Start Command
+
+```
+npm start
+```
+
+4. Render generará una URL pública donde la aplicación estará disponible.
+
+---
+
+# Mejoras futuras
+
+* Integración con IA real usando API
+* Base de datos de usuarios
+* Historial de entrevistas
+* Evaluación automática con puntaje
+* Interfaz estilo chat
+
+---
+
+# Autor
+
+Proyecto desarrollado con fines educativos para simular procesos de entrevistas laborales.
