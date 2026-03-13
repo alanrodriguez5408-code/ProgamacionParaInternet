@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Memorama Minimalista</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+background:#111;
+color:white;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+height:100vh;
+}
+
+h1{
+margin-bottom:10px;
+font-weight:300;
+letter-spacing:2px;
+}
+
+.stats{
+display:flex;
+gap:30px;
+margin-bottom:20px;
+font-size:18px;
+}
+
+button{
+padding:8px 16px;
+border:none;
+background:white;
+color:black;
+cursor:pointer;
+border-radius:6px;
+margin-bottom:20px;
+transition:0.3s;
+}
+
+button:hover{
+opacity:0.8;
+}
+
+.board{
+display:grid;
+grid-template-columns:repeat(4,100px);
+gap:12px;
+}
+
+.card{
+width:100px;
+height:100px;
+perspective:1000px;
+}
+
+.card-inner{
+width:100%;
+height:100%;
+position:relative;
+transform-style:preserve-3d;
+transition:transform 0.6s;
+}
+
+.card.flip .card-inner{
+transform:rotateY(180deg);
+}
+
+.front, .back{
+position:absolute;
+width:100%;
+height:100%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:35px;
+border-radius:10px;
+backface-visibility:hidden;
+}
+
+.front{
+background:#1e1e1e;
+}
+
+.back{
+background:white;
+color:black;
+transform:rotateY(180deg);
+}
+
+.matched .card-inner{
+transform:rotateY(180deg);
+}
+
+</style>
+</head>
+
+
+<body>
+
+<h1>MEMORAMA</h1>
+
+<div class="stats">
+<div>⏱ Tiempo: <span id="time">0</span>s</div>
+<div>🎯 Movimientos: <span id="moves">0</span></div>
+</div>
+
+<button onclick="startGame()">Reiniciar</button>
+
+<div class="board" id="board"></div>
+
+
+<script>
+
+const symbols = ['🍎','🍌','🍇','🍉','🍒','🥝','🍍','🥑'];
+let cards = [...symbols, ...symbols];
+
+let firstCard = null;
+let secondCard = null;
+let lock = false;
+
+let moves = 0;
+let time = 0;
+let timer;
+
+const board = document.getElementById("board");
+const movesText = document.getElementById("moves");
+const timeText = document.getElementById("time");
+
+
+function shuffle(array){
+return array.sort(()=>Math.random()-0.5);
+}
+
+
+function createBoard(){
+
+board.innerHTML="";
+cards = shuffle(cards);
+
+cards.forEach(symbol=>{
+
+const card = document.createElement("div");
+card.classList.add("card");
+
+card.innerHTML=`
+<div class="card-inner">
+<div class="front"></div>
+<div class="back">${symbol}</div>
+</div>
+`;
+
+card.addEventListener("click",flipCard);
+
+board.appendChild(card);
+
+});
+
+}
+
+
+function flipCard(){
+
+if(lock) return;
+if(this === firstCard) return;
+
+this.classList.add("flip");
+
+if(!firstCard){
+firstCard = this;
+return;
+}
+
+secondCard = this;
+
+moves++;
+movesText.textContent = moves;
+
+checkMatch();
+
+}
+
+
+function checkMatch(){
+
+let match = firstCard.innerText === secondCard.innerText;
+
+if(match){
+
+firstCard.classList.add("matched");
+secondCard.classList.add("matched");
+
+reset();
+
+}else{
+
+lock = true;
+
+setTimeout(()=>{
+
+firstCard.classList.remove("flip");
+secondCard.classList.remove("flip");
+
+reset();
+
+},800);
+
+}
+
+}
+
+
+function reset(){
+
+firstCard = null;
+secondCard = null;
+lock = false;
+
+checkWin();
+
+}
+
+
+function checkWin(){
+
+let matched = document.querySelectorAll(".matched");
+
+if(matched.length === 16){
+
+clearInterval(timer);
+
+setTimeout(()=>{
+
+alert("🎉 Ganaste en " + moves + " movimientos y " + time + " segundos");
+
+},500);
+
+}
+
+}
+
+
+function startGame(){
+
+moves = 0;
+time = 0;
+
+movesText.textContent = 0;
+timeText.textContent = 0;
+
+clearInterval(timer);
+
+timer = setInterval(()=>{
+time++;
+timeText.textContent = time;
+},1000);
+
+createBoard();
+
+}
+
+
+startGame();
+
+</script>
+
+</body>
+</html>
