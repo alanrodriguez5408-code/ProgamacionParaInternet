@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador IA PRO — Entrevistas</title>
+<style>
+
+/* ===== VARIABLES ===== */
+:root {
+  --bg: #141e30;
+  --bg2: #243b55;
+  --card: #ffffff;
+  --card2: #f1f5f9;
+  --text: #1e293b;
+  --text2: #64748b;
+  --primary: #4facfe;
+  --primary2: #00f2fe;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --border: #e2e8f0;
+  --shadow: 0 20px 60px rgba(0,0,0,.25);
+  --radius: 14px;
+}
+
+body.dark {
+  --card: #1e293b;
+  --card2: #0f172a;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --border: #334155;
+}
+
+/* ===== RESET ===== */
+*, *::before, *::after {
+  margin: 0; padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, var(--bg), var(--bg2));
+  color: var(--text);
+  transition: background .3s, color .3s;
+  padding: 20px;
+}
+
+/* ===== SWITCH MODO ===== */
+.switch {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  cursor: pointer;
+  background: var(--card);
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  z-index: 999;
+  transition: .3s;
+  user-select: none;
+}
+.switch:hover { opacity: .85; }
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.main {
+  width: 100%;
+  max-width: 1000px;
+  background: var(--card);
+  border-radius: var(--radius);
+  display: flex;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  min-height: 560px;
+}
+
+/* ===== PANEL IZQUIERDO ===== */
+.left {
+  width: 38%;
+  background: linear-gradient(160deg, #4facfe, #00f2fe);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 30px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.left::before {
+  content: '';
+  position: absolute;
+  width: 300px; height: 300px;
+  background: rgba(255,255,255,.08);
+  border-radius: 50%;
+  top: -80px; left: -80px;
+}
+.left::after {
+  content: '';
+  position: absolute;
+  width: 200px; height: 200px;
+  background: rgba(255,255,255,.06);
+  border-radius: 50%;
+  bottom: -50px; right: -50px;
+}
+
+.left .logo {
+  font-size: 52px;
+  margin-bottom: 16px;
+  position: relative; z-index: 1;
+}
+.left h1 {
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 10px;
+  position: relative; z-index: 1;
+}
+.left p {
+  font-size: 14px;
+  opacity: .88;
+  line-height: 1.6;
+  position: relative; z-index: 1;
+}
+
+/* Barra de probabilidad en el panel izquierdo */
+.prob-panel {
+  display: none;
+  margin-top: 30px;
+  width: 100%;
+  position: relative; z-index: 1;
+}
+.prob-panel.visible { display: block; }
+.prob-label {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.prob-circle {
+  width: 110px; height: 110px;
+  border-radius: 50%;
+  background: conic-gradient(white 0%, rgba(255,255,255,.2) 0%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  position: relative;
+  box-shadow: 0 0 0 6px rgba(255,255,255,.15);
+  transition: background 1s;
+}
+.prob-circle::before {
+  content: '';
+  position: absolute;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(160deg, #4facfe, #00f2fe);
+}
+.prob-number {
+  position: relative; z-index: 1;
+  font-size: 26px;
+  font-weight: 900;
+  color: white;
+}
+.prob-desc {
+  font-size: 12px;
+  opacity: .85;
+  line-height: 1.5;
+  margin-top: 6px;
+}
+
+/* ===== PANEL DERECHO ===== */
+.right {
+  width: 62%;
+  padding: 36px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+/* ===== LOGIN ===== */
+#login h2 {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+#login p.sub {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 20px;
+}
+
+/* ===== INPUTS ===== */
+.input-group {
+  margin-bottom: 14px;
+}
+.input-group label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  display: block;
+  margin-bottom: 5px;
+}
+input, textarea, select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--card2);
+  color: var(--text);
+  font-size: 14px;
+  transition: border .2s, box-shadow .2s;
+  outline: none;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79,172,254,.15);
+}
+textarea { resize: vertical; min-height: 90px; }
+
+/* ===== BOTONES ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 20px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: .2s;
+}
+.btn:hover { opacity: .88; transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn-primary { background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; }
+.btn-secondary { background: var(--card2); color: var(--text); border: 1.5px solid var(--border); }
+.btn-success { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }
+.btn-full { width: 100%; justify-content: center; }
+.btn-sm { padding: 7px 14px; font-size: 12px; }
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+/* ===== ERROR ===== */
+.error-msg {
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 600;
+  display: none;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(239,68,68,.08);
+  border-radius: 8px;
+  border-left: 3px solid var(--danger);
+}
+
+/* ===== APP ===== */
+#app { display: none; flex-direction: column; gap: 14px; }
+#app.visible { display: flex; }
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.app-header h2 { font-size: 20px; font-weight: 800; }
+.badge {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ===== PUESTO ROW ===== */
+.puesto-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+.puesto-row .input-group { flex: 1; margin: 0; }
+
+/* ===== CAJA DE PREGUNTA ===== */
+.question-box {
+  background: linear-gradient(135deg, rgba(79,172,254,.08), rgba(0,242,254,.06));
+  border: 1.5px solid rgba(79,172,254,.25);
+  border-radius: 12px;
+  padding: 16px 18px;
+  min-height: 60px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.6;
+  position: relative;
+}
+.question-box .q-icon {
+  font-size: 18px;
+  margin-right: 8px;
+}
+
+/* ===== PREGUNTAS SUGERIDAS ===== */
+.suggested-section {
+  display: none;
+}
+.suggested-section.visible { display: block; }
+.suggested-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 8px;
+}
+.suggested-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.suggested-item {
+  background: var(--card2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: .2s;
+  color: var(--text);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.suggested-item:hover {
+  border-color: var(--primary);
+  background: rgba(79,172,254,.06);
+  color: var(--primary);
+}
+.suggested-item .si-num {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  color: white;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+/* ===== FEEDBACK CARDS ===== */
+.feedback-section {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+}
+.feedback-section.visible { display: flex; }
+
+.fb-card {
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 13.5px;
+  line-height: 1.65;
+}
+.fb-card .fb-title {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.fb-card.green {
+  background: rgba(34,197,94,.08);
+  border: 1.5px solid rgba(34,197,94,.25);
+  color: var(--text);
+}
+.fb-card.green .fb-title { color: #16a34a; }
+.fb-card.orange {
+  background: rgba(245,158,11,.08);
+  border: 1.5px solid rgba(245,158,11,.25);
+  color: var(--text);
+}
+.fb-card.orange .fb-title { color: #d97706; }
+.fb-card.blue {
+  background: rgba(79,172,254,.08);
+  border: 1.5px solid rgba(79,172,254,.25);
+  color: var(--text);
+}
+.fb-card.blue .fb-title { color: #0284c7; }
+.fb-card.purple {
+  background: rgba(168,85,247,.08);
+  border: 1.5px solid rgba(168,85,247,.25);
+  color: var(--text);
+}
+.fb-card.purple .fb-title { color: #9333ea; }
+
+/* Preguntas de seguimiento */
+.follow-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+.follow-item {
+  background: rgba(79,172,254,.06);
+  border: 1.5px solid rgba(79,172,254,.2);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: .2s;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.follow-item:hover {
+  border-color: var(--primary);
+  background: rgba(79,172,254,.12);
+}
+.follow-item::before {
+  content: '→';
+  color: var(--primary);
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+/* ===== LOADING ===== */
+.loading {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  color: var(--text2);
+  font-size: 13px;
+  padding: 10px 0;
+}
+.loading.visible { display: flex; }
+.spinner {
+  width: 20px; height: 20px;
+  border: 2.5px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== HISTORIAL BADGE ===== */
+.hist-count {
+  background: rgba(79,172,254,.15);
+  color: var(--primary);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 700px) {
+  .main { flex-direction: column; }
+  .left { width: 100%; padding: 30px 20px; }
+  .right { width: 100%; padding: 24px 20px; }
+  .prob-panel { display: none !important; }
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+</style>
+</head>
+<body>
+
+<div class="switch" onclick="toggleDark()">🌙 Modo</div>
+
+<div class="main">
+
+  <!-- ===== PANEL IZQUIERDO ===== -->
+  <div class="left">
+    <div class="logo">🤖</div>
+    <h1>Simulador IA PRO</h1>
+    <p>Entrena entrevistas laborales con inteligencia artificial real. Recibe retroalimentación, análisis y tu probabilidad de éxito.</p>
+
+    <div class="prob-panel" id="probPanel">
+      <div class="prob-label">Probabilidad de empleo</div>
+      <div class="prob-circle" id="probCircle">
+        <span class="prob-number" id="probNumber">—</span>
+      </div>
+      <div class="prob-desc" id="probDesc">Responde preguntas para obtener tu análisis</div>
+    </div>
+  </div>
+
+  <!-- ===== PANEL DERECHO ===== -->
+  <div class="right">
+
+    <!-- LOGIN -->
+    <div id="login">
+      <h2>Iniciar Sesión</h2>
+      <p class="sub">Accede a tu simulador de entrevistas con IA</p>
+
+      <div class="input-group">
+        <label>Usuario</label>
+        <input id="user" placeholder="Tu nombre de usuario" autocomplete="username">
+      </div>
+      <div class="input-group">
+        <label>Contraseña</label>
+        <input id="pass" type="password" placeholder="Tu contraseña" autocomplete="current-password">
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary btn-full" onclick="login()">🔐 Entrar</button>
+      </div>
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="btn btn-secondary btn-full" onclick="registrar()">📝 Registrar usuario</button>
+      </div>
+
+      <div class="error-msg" id="error">❌ Usuario o contraseña incorrectos</div>
+    </div>
+
+    <!-- APP -->
+    <div id="app">
+
+      <div class="app-header">
+        <h2>👋 Bienvenido</h2>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="hist-count" id="histCount">0 respuestas</span>
+          <button class="btn btn-secondary btn-sm" onclick="reiniciar()">🔄 Reiniciar</button>
+          <button class="btn btn-secondary btn-sm" onclick="cerrarSesion()">🚪 Salir</button>
+        </div>
+      </div>
+
+      <!-- PUESTO -->
+      <div class="puesto-row">
+        <div class="input-group">
+          <label>Puesto al que aplicas</label>
+          <input id="puesto" placeholder="Ej: Gerente de ventas, Desarrollador web…">
+        </div>
+        <button class="btn btn-secondary" onclick="cargarSugeridas()" title="Ver preguntas sugeridas">📋</button>
+      </div>
+
+      <!-- PREGUNTAS SUGERIDAS -->
+      <div class="suggested-section" id="suggestedSection">
+        <div class="suggested-title">💡 Elige una pregunta o genera una aleatoria</div>
+        <div class="loading" id="loadingSug">
+          <div class="spinner"></div> Generando preguntas sugeridas…
+        </div>
+        <div class="suggested-list" id="suggestedList"></div>
+      </div>
+
+      <!-- BOTÓN GENERAR -->
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="generar()">✨ Generar pregunta aleatoria</button>
+      </div>
+
+      <!-- PREGUNTA ACTUAL -->
+      <div class="loading" id="loadingQ">
+        <div class="spinner"></div> La IA está pensando una pregunta…
+      </div>
+      <div class="question-box" id="pregunta" style="display:none;">
+        <span class="q-icon">❓</span><span id="preguntaTexto"></span>
+      </div>
+
+      <!-- RESPUESTA -->
+      <div class="input-group" id="respuestaGroup" style="display:none;">
+        <label>Tu respuesta</label>
+        <textarea id="respuesta" placeholder="Escribe aquí tu respuesta a la pregunta de entrevista…"></textarea>
+        <div class="btn-row" style="margin-top:8px;">
+          <button class="btn btn-success" onclick="evaluar()">🧠 Evaluar con IA</button>
+        </div>
+      </div>
+
+      <!-- LOADING EVALUACIÓN -->
+      <div class="loading" id="loadingEval">
+        <div class="spinner"></div> La IA está analizando tu respuesta…
+      </div>
+
+      <!-- FEEDBACK -->
+      <div class="feedback-section" id="feedbackSection">
+
+        <div class="fb-card green">
+          <div class="fb-title">✅ Puntos fuertes</div>
+          <div id="fbFuertes"></div>
+        </div>
+
+        <div class="fb-card orange">
+          <div class="fb-title">⚠️ ¿Qué le falta a tu respuesta?</div>
+          <div id="fbFalta"></div>
+        </div>
+
+        <div class="fb-card blue">
+          <div class="fb-title">💬 Retroalimentación general</div>
+          <div id="fbGeneral"></div>
+        </div>
+
+        <div class="fb-card purple">
+          <div class="fb-title">💡 Consejo para mejorar</div>
+          <div id="fbConsejo"></div>
+        </div>
+
+        <div class="fb-card blue">
+          <div class="fb-title">🔗 Preguntas relacionadas — haz clic para responderlas</div>
+          <div class="follow-list" id="fbRelacionadas"></div>
+        </div>
+
+        <div class="btn-row" style="margin-top:4px;">
+          <button class="btn btn-primary" onclick="generar()">➡️ Siguiente pregunta</button>
+        </div>
+
+      </div>
+
+    </div>
+    <!-- /app -->
+
+  </div>
+  <!-- /right -->
+
+</div>
+<!-- /main -->
+
+<script>
+
+// ===== ESTADO =====
+let preguntaActual = ""
+let historialPreguntas = []
+let historialRespuestas = []
+let usuarioActual = ""
+
+// ===== MODO OSCURO =====
+function toggleDark() {
+  document.body.classList.toggle("dark")
+  localStorage.setItem("darkMode", document.body.classList.contains("dark"))
+}
+if (localStorage.getItem("darkMode") === "true") document.body.classList.add("dark")
+
+// ===== REGISTRO =====
+function registrar() {
+  const user = document.getElementById("user").value.trim().toLowerCase()
+  const pass = document.getElementById("pass").value.trim()
+  if (!user || !pass) return alert("Por favor llena ambos campos.")
+  const usuarios = JSON.parse(localStorage.getItem("usuarios") || "{}")
+  if (usuarios[user]) return alert("Ese usuario ya existe.")
+  usuarios[user] = pass
+  localStorage.setItem("usuarios", JSON.stringify(usuarios))
+  alert("✅ Usuario registrado correctamente. Ya puedes iniciar sesión.")
+}
+
+// ===== LOGIN =====
+function login() {
+  const user = document.getElementById("user").value.trim().toLowerCase()
+  const pass = document.getElementById("pass").value.trim()
+  const usuarios = JSON.parse(localStorage.getItem("usuarios") || "{}")
+  // Usuarios por defecto
+  usuarios["alan"] = "alanyever2.0"
+  usuarios["ever"] = "alanyever2.0"
+  if (usuarios[user] === pass) {
+    usuarioActual = user
+    document.getElementById("login").style.display = "none"
+    document.getElementById("app").classList.add("visible")
+    document.getElementById("error").style.display = "none"
+  } else {
+    document.getElementById("error").style.display = "block"
+  }
+}
+
+// ===== CERRAR SESIÓN =====
+function cerrarSesion() {
+  usuarioActual = ""
+  historialPreguntas = []
+  historialRespuestas = []
+  preguntaActual = ""
+  document.getElementById("app").classList.remove("visible")
+  document.getElementById("login").style.display = "flex"
+  document.getElementById("login").style.flexDirection = "column"
+  ocultarFeedback()
+  document.getElementById("pregunta").style.display = "none"
+  document.getElementById("respuestaGroup").style.display = "none"
+  document.getElementById("suggestedSection").classList.remove("visible")
+  document.getElementById("probPanel").classList.remove("visible")
+  actualizarContador()
+}
+
+// ===== REINICIAR =====
+function reiniciar() {
+  if (!confirm("¿Reiniciar la sesión de práctica? Se perderá el historial.")) return
+  historialPreguntas = []
+  historialRespuestas = []
+  preguntaActual = ""
+  ocultarFeedback()
+  document.getElementById("pregunta").style.display = "none"
+  document.getElementById("respuestaGroup").style.display = "none"
+  document.getElementById("respuesta").value = ""
+  document.getElementById("suggestedSection").classList.remove("visible")
+  document.getElementById("probPanel").classList.remove("visible")
+  actualizarContador()
+}
+
+// ===== ACTUALIZAR CONTADOR =====
+function actualizarContador() {
+  document.getElementById("histCount").textContent = historialRespuestas.length + " respuesta" + (historialRespuestas.length !== 1 ? "s" : "")
+}
+
+// ===== EFECTO ESCRITURA =====
+function escribir(texto, elemento) {
+  elemento.innerHTML = ""
+  let i = 0
+  const intervalo = setInterval(() => {
+    elemento.innerHTML += texto[i]
+    i++
+    if (i >= texto.length) clearInterval(intervalo)
+  }, 18)
+}
+
+// ===== CARGAR PREGUNTAS SUGERIDAS =====
+async function cargarSugeridas() {
+  const puesto = document.getElementById("puesto").value.trim()
+  if (!puesto) return alert("Primero escribe el puesto al que aplicas.")
+
+  const sec = document.getElementById("suggestedSection")
+  sec.classList.add("visible")
+  document.getElementById("loadingSug").classList.add("visible")
+  document.getElementById("suggestedList").innerHTML = ""
+
+  try {
+    const res = await fetch("/preguntas_sugeridas", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ puesto })
+    })
+    const data = await res.json()
+    document.getElementById("loadingSug").classList.remove("visible")
+    const lista = document.getElementById("suggestedList")
+    lista.innerHTML = ""
+    data.preguntas.forEach((p, i) => {
+      const btn = document.createElement("button")
+      btn.className = "suggested-item"
+      btn.innerHTML = `<span class="si-num">${i + 1}</span>${p}`
+      btn.onclick = () => seleccionarPregunta(p)
+      lista.appendChild(btn)
+    })
+  } catch (e) {
+    document.getElementById("loadingSug").classList.remove("visible")
+    alert("Error al cargar preguntas sugeridas. Verifica la conexión.")
+  }
+}
+
+// ===== SELECCIONAR PREGUNTA SUGERIDA =====
+function seleccionarPregunta(pregunta) {
+  preguntaActual = pregunta
+  document.getElementById("preguntaTexto").textContent = pregunta
+  document.getElementById("pregunta").style.display = "block"
+  document.getElementById("respuestaGroup").style.display = "block"
+  document.getElementById("respuesta").value = ""
+  ocultarFeedback()
+  document.getElementById("respuesta").focus()
+  historialPreguntas.push(pregunta)
+  // Scroll suave
+  document.getElementById("respuestaGroup").scrollIntoView({ behavior: "smooth", block: "nearest" })
+}
+
+// ===== GENERAR PREGUNTA ALEATORIA =====
+async function generar() {
+  const puesto = document.getElementById("puesto").value.trim()
+  if (!puesto) return alert("Escribe el puesto al que aplicas.")
+
+  document.getElementById("loadingQ").classList.add("visible")
+  document.getElementById("pregunta").style.display = "none"
+  document.getElementById("respuestaGroup").style.display = "none"
+  ocultarFeedback()
+
+  try {
+    const res = await fetch("/generar_pregunta", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ puesto, historial: historialPreguntas })
+    })
+    const data = await res.json()
+    document.getElementById("loadingQ").classList.remove("visible")
+    preguntaActual = data.pregunta
+    historialPreguntas.push(preguntaActual)
+    document.getElementById("preguntaTexto").textContent = ""
+    document.getElementById("pregunta").style.display = "block"
+    document.getElementById("respuestaGroup").style.display = "block"
+    document.getElementById("respuesta").value = ""
+    escribir(preguntaActual, document.getElementById("preguntaTexto"))
+    document.getElementById("respuesta").focus()
+  } catch (e) {
+    document.getElementById("loadingQ").classList.remove("visible")
+    alert("Error al conectar con la IA. Verifica la conexión.")
+  }
+}
+
+// ===== EVALUAR RESPUESTA =====
+async function evaluar() {
+  const respuesta = document.getElementById("respuesta").value.trim()
+  const puesto = document.getElementById("puesto").value.trim()
+  if (!respuesta) return alert("Escribe tu respuesta antes de evaluar.")
+  if (!preguntaActual) return alert("Primero genera una pregunta.")
+
+  document.getElementById("loadingEval").classList.add("visible")
+  ocultarFeedback()
+
+  try {
+    const res = await fetch("/evaluar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        puesto,
+        pregunta: preguntaActual,
+        respuesta,
+        historial_respuestas: historialRespuestas
+      })
+    })
+    const data = await res.json()
+    document.getElementById("loadingEval").classList.remove("visible")
+
+    // Guardar en historial
+    historialRespuestas.push({ pregunta: preguntaActual, respuesta })
+    actualizarContador()
+
+    // Mostrar feedback
+    mostrarFeedback(data)
+
+    // Actualizar probabilidad
+    actualizarProbabilidad(data.probabilidad, data.justificacion_probabilidad)
+
+  } catch (e) {
+    document.getElementById("loadingEval").classList.remove("visible")
+    alert("Error al evaluar. Verifica la conexión.")
+  }
+}
+
+// ===== MOSTRAR FEEDBACK =====
+function mostrarFeedback(data) {
+  document.getElementById("fbFuertes").textContent = data.puntos_fuertes || "—"
+  document.getElementById("fbFalta").textContent = data.que_le_falta || "—"
+  document.getElementById("fbGeneral").textContent = data.feedback || "—"
+  document.getElementById("fbConsejo").textContent = data.consejo || "—"
+
+  // Preguntas relacionadas
+  const lista = document.getElementById("fbRelacionadas")
+  lista.innerHTML = ""
+  if (data.preguntas_relacionadas && data.preguntas_relacionadas.length > 0) {
+    data.preguntas_relacionadas.forEach(p => {
+      const item = document.createElement("div")
+      item.className = "follow-item"
+      item.textContent = p
+      item.onclick = () => seleccionarPregunta(p)
+      lista.appendChild(item)
+    })
+  } else {
+    lista.innerHTML = "<em style='color:var(--text2);font-size:13px;'>No se generaron preguntas relacionadas.</em>"
+  }
+
+  document.getElementById("feedbackSection").classList.add("visible")
+  document.getElementById("feedbackSection").scrollIntoView({ behavior: "smooth", block: "start" })
+}
+
+// ===== OCULTAR FEEDBACK =====
+function ocultarFeedback() {
+  document.getElementById("feedbackSection").classList.remove("visible")
+}
+
+// ===== ACTUALIZAR PROBABILIDAD =====
+function actualizarProbabilidad(porcentaje, descripcion) {
+  const panel = document.getElementById("probPanel")
+  panel.classList.add("visible")
+
+  const num = document.getElementById("probNumber")
+  const desc = document.getElementById("probDesc")
+  const circle = document.getElementById("probCircle")
+
+  // Animación del número
+  let current = parseInt(num.textContent) || 0
+  const target = porcentaje
+  const step = target > current ? 1 : -1
+  const intervalo = setInterval(() => {
+    current += step
+    num.textContent = current + "%"
+    if (current === target) clearInterval(intervalo)
+  }, 20)
+
+  // Color del círculo según porcentaje
+  let color = "white"
+  if (porcentaje >= 70) color = "#bbf7d0"
+  else if (porcentaje >= 45) color = "#fef08a"
+  else color = "#fecaca"
+
+  circle.style.background = `conic-gradient(${color} ${porcentaje}%, rgba(255,255,255,.15) 0%)`
+
+  desc.textContent = descripcion || ""
+}
+
+</script>
+</body>
+</html>
